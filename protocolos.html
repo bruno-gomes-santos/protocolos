@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Protocolos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .modal { display: none; }
+        .modal.active { display: flex; }
+    </style>
+</head>
+<body class="bg-gray-200">
+
+    <div class="flex items-center justify-center min-h-screen">
+        <div class="w-full max-w-md bg-white p-8 rounded-xl shadow-lg m-4">
+            
+            <!-- INÍCIO: Seção do Logo -->
+            <div class="flex justify-center mb-6">
+                <!-- 
+                  CORRIGIDO: O link abaixo é um exemplo de URL de imagem DIRETO, que funciona.
+                  Substitua este link pelo link direto do seu logo.
+                -->
+                <img 
+                    src="https://i.ibb.co/GvMSy23C/Logotipo-Fiel-Cont-bil-01.png" 
+                    alt="Logo da Empresa" 
+                    class="h-16"
+                    onerror="this.onerror=null; this.src='https://placehold.co/200x80/cccccc/FFFFFF?text=Logo+Inv%C3%A1lida';"
+                >
+            </div>
+            <!-- FIM: Seção do Logo -->
+
+            <h1 class="text-2xl font-bold text-gray-800 text-center mb-6">Novo Protocolo</h1>
+
+            <form id="protocoloForm">
+                <!-- Campo para digitar o código da empresa com botão de busca -->
+                <div class="mb-4">
+                    <label for="codigoEmpresa" class="block text-sm font-medium text-gray-700 mb-1">Código da Empresa</label>
+                    <div class="relative">
+                        <input type="text" id="codigoEmpresa" required class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500 pr-10" placeholder="Digite o código ou busque">
+                        <!-- COR: Alterado o hover para a nova cor -->
+                        <button type="button" id="searchButton" class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-black">
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Campo para exibir o nome da empresa (preenchido automaticamente) -->
+                <div class="mb-4">
+                    <label for="empresa" class="block text-sm font-medium text-gray-700 mb-1">Empresa</label>
+                    <input type="text" id="empresa" name="Empresa" readonly class="w-full px-3 py-2 border-gray-200 bg-gray-100 rounded-md shadow-sm" placeholder="Preenchido automaticamente">
+                </div>
+
+                <!-- Restante do formulário -->
+                <div class="mb-4">
+                    <label for="protocolo" class="block text-sm font-medium text-gray-700 mb-1">Nº Protocolo</label>
+                    <input type="text" id="protocolo" name="Protocolo" required class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500">
+                </div>
+
+                <div class="mb-4">
+                    <label for="data" class="block text-sm font-medium text-gray-700 mb-1">Data</label>
+                    <input type="date" id="data" name="Data" required class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500">
+                </div>
+
+                <div class="mb-4">
+                    <label for="emissor" class="block text-sm font-medium text-gray-700 mb-1">Quem Emitiu</label>
+                    <select id="emissor" name="Quem Emitiu" required class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500">
+                        <option value="">Carregando...</option>
+                    </select>
+                </div>
+                
+                <div class="mb-6">
+                    <label for="responsavel" class="block text-sm font-medium text-gray-700 mb-1">Responsável pela Liberação</label>
+                    <select id="responsavel" name="Responsavel Liberacao" required class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500">
+                        <option value="">Carregando...</option>
+                    </select>
+                </div>
+
+                <!-- COR: Botão principal atualizado para a nova cor (bg-gray-800) -->
+                <button type="submit" id="submitButton" class="w-full bg-gray-800 text-white font-bold py-3 px-4 rounded-md hover:bg-black focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-300">
+                    Salvar na Planilha
+                </button>
+            </form>
+
+            <div id="message" class="mt-4 text-center text-sm"></div>
+        </div>
+    </div>
+
+    <!-- Modal de Busca de Empresas -->
+    <div id="searchModal" class="modal fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full items-center justify-center">
+        <div class="relative mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white">
+            <div class="flex justify-between items-center pb-3">
+                <p class="text-2xl font-bold">Buscar Empresa</p>
+                <button id="closeModalButton" class="cursor-pointer z-50">
+                    <svg class="h-6 w-6 text-gray-500 hover:text-gray-800" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <input type="text" id="modalSearchInput" class="w-full px-3 py-2 border border-gray-300 rounded-md mb-3 focus:ring-gray-500 focus:border-gray-500" placeholder="Digite para filtrar por código ou nome...">
+            <div class="max-h-64 overflow-y-auto">
+                <ul id="companyList" class="divide-y divide-gray-200">
+                    <!-- Lista de empresas será populada aqui -->
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxkLcuvaPfa04UBfnICUM0jou-AYLrXlyvW9UepYk65KgNkHg9d40lHgLzHqzd3YBqe/exec";
+
+        // Elementos do formulário principal
+        const form = document.getElementById('protocoloForm');
+        const submitButton = document.getElementById('submitButton');
+        const messageDiv = document.getElementById('message');
+        const inputCodigoEmpresa = document.getElementById('codigoEmpresa');
+        const inputEmpresaNome = document.getElementById('empresa');
+        const selectEmissor = document.getElementById('emissor');
+        const selectResponsavel = document.getElementById('responsavel');
+        
+        // Elementos do Modal
+        const searchButton = document.getElementById('searchButton');
+        const searchModal = document.getElementById('searchModal');
+        const closeModalButton = document.getElementById('closeModalButton');
+        const modalSearchInput = document.getElementById('modalSearchInput');
+        const companyListUl = document.getElementById('companyList');
+
+        let listaEmpresas = [];
+
+        // --- Funções do Modal ---
+        function openModal() {
+            renderCompanyList(); // Renderiza a lista completa
+            searchModal.classList.add('active');
+            modalSearchInput.focus();
+        }
+
+        function closeModal() {
+            searchModal.classList.remove('active');
+            modalSearchInput.value = ''; // Limpa a busca do modal
+        }
+
+        function renderCompanyList(filter = '') {
+            companyListUl.innerHTML = '';
+            const lowerCaseFilter = filter.toLowerCase();
+
+            const filteredList = listaEmpresas.filter(emp => 
+                emp.nome.toLowerCase().includes(lowerCaseFilter) ||
+                String(emp.codigo).toLowerCase().includes(lowerCaseFilter)
+            );
+
+            if (filteredList.length === 0) {
+                companyListUl.innerHTML = `<li class="p-3 text-gray-500">Nenhuma empresa encontrada.</li>`;
+                return;
+            }
+
+            filteredList.forEach(emp => {
+                const li = document.createElement('li');
+                li.className = 'p-3 hover:bg-gray-100 cursor-pointer';
+                li.textContent = `${emp.codigo} - ${emp.nome}`;
+                li.dataset.codigo = emp.codigo;
+                li.dataset.nome = emp.nome;
+                li.addEventListener('click', () => {
+                    inputCodigoEmpresa.value = emp.codigo;
+                    inputEmpresaNome.value = emp.nome;
+                    inputEmpresaNome.classList.remove('text-red-500');
+                    closeModal();
+                });
+                companyListUl.appendChild(li);
+            });
+        }
+        
+        searchButton.addEventListener('click', openModal);
+        closeModalButton.addEventListener('click', closeModal);
+        modalSearchInput.addEventListener('input', () => renderCompanyList(modalSearchInput.value));
+        // Fecha o modal se clicar fora da caixa de conteúdo
+        searchModal.addEventListener('click', (e) => {
+            if (e.target === searchModal) {
+                closeModal();
+            }
+        });
+
+
+        // --- Funções do Formulário ---
+        function popularDropdown(selectElement, items, placeholder) {
+            selectElement.innerHTML = '';
+            const placeholderOption = document.createElement('option');
+            placeholderOption.value = "";
+            placeholderOption.textContent = placeholder;
+            placeholderOption.disabled = true;
+            placeholderOption.selected = true;
+            selectElement.appendChild(placeholderOption);
+            items.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item;
+                option.textContent = item;
+                selectElement.appendChild(option);
+            });
+            selectElement.disabled = false;
+        }
+
+        function carregarListas() {
+            fetch(SCRIPT_URL)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) throw new Error(data.error);
+                    listaEmpresas = data.empresas;
+                    popularDropdown(selectEmissor, data.pessoas, 'Selecione quem emitiu');
+                    popularDropdown(selectResponsavel, data.pessoas, 'Selecione o responsável');
+                })
+                .catch(error => {
+                    console.error('Erro ao carregar listas:', error);
+                    messageDiv.textContent = `Erro ao carregar listas: ${error.message}`;
+                    messageDiv.className = 'mt-4 text-center text-sm text-red-600';
+                });
+        }
+        
+        function procurarEmpresa() {
+            const codigoDigitado = inputCodigoEmpresa.value.trim();
+            inputEmpresaNome.value = '';
+            if (!codigoDigitado) return;
+
+            const empresaEncontrada = listaEmpresas.find(emp => emp.codigo == codigoDigitado);
+
+            if (empresaEncontrada) {
+                inputEmpresaNome.value = empresaEncontrada.nome;
+                inputEmpresaNome.classList.remove('text-red-500');
+            } else {
+                inputEmpresaNome.value = 'Código não encontrado';
+                inputEmpresaNome.classList.add('text-red-500');
+            }
+        }
+
+        inputCodigoEmpresa.addEventListener('input', procurarEmpresa);
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            if (!inputEmpresaNome.value || inputEmpresaNome.value === 'Código não encontrado') {
+                messageDiv.textContent = 'Por favor, insira um código de empresa válido.';
+                messageDiv.className = 'mt-4 text-center text-sm text-red-600';
+                inputCodigoEmpresa.focus();
+                return;
+            }
+
+            submitButton.disabled = true;
+            submitButton.textContent = 'Enviando...';
+            messageDiv.textContent = '';
+            
+            fetch(SCRIPT_URL, { method: 'POST', body: new FormData(form) })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.result === 'success') {
+                        messageDiv.textContent = 'Protocolo salvo com sucesso!';
+                        messageDiv.className = 'mt-4 text-center text-sm text-green-600';
+                        form.reset();
+                        inputEmpresaNome.value = '';
+                        document.querySelectorAll('select').forEach(select => select.selectedIndex = 0);
+                    } else {
+                        throw new Error(data.error || 'Ocorreu um erro.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    messageDiv.textContent = `Erro ao salvar: ${error.message}`;
+                    messageDiv.className = 'mt-4 text-center text-sm text-red-600';
+                })
+                .finally(() => {
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'Salvar na Planilha';
+                });
+        });
+
+        document.getElementById('data').valueAsDate = new Date();
+        document.addEventListener('DOMContentLoaded', carregarListas);
+    </script>
+
+</body>
+</html>
